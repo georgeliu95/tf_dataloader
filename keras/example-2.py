@@ -9,8 +9,8 @@ STEPS = 50
 GLOBAL_BATCH_SIZE = 65536
 METHOD_ID = 0
 if(len(sys.argv)==2):
-    if(sys.argv[1]<7):
-        METHOD_ID = sys.argv[1]
+    if(int(sys.argv[1])<7):
+        METHOD_ID = int(sys.argv[1])
     else:
         print("METHOD_ID={}, which should be less than 7, take 0 as default".format(sys.argv[1]))
 
