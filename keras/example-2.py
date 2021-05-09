@@ -8,8 +8,11 @@ print('Number of devices: {}'.format(mirrored_strategy.num_replicas_in_sync))
 STEPS = 50
 GLOBAL_BATCH_SIZE = 65536
 METHOD_ID = 0
-if(len(sys.argv[])==2):
-    METHOD_ID = sys.argv[1]
+if(len(sys.argv)==2):
+    if(sys.argv[1]<7):
+        METHOD_ID = sys.argv[1]
+    else:
+        print("METHOD_ID={}, which should be less than 7, take 0 as default".format(sys.argv[1]))
 
 features = tf.random.normal([GLOBAL_BATCH_SIZE, 8 * 1024], dtype=tf.float32)
 labels = tf.random.uniform([GLOBAL_BATCH_SIZE, 1], 0, 2, dtype=tf.int64)
@@ -36,7 +39,7 @@ elif(METHOD_ID in [3,4,5,6]):
     else:
         dist_dataset = mirrored_strategy.distribute_datasets_from_function(dataset_fn, tf.distribute.InputOptions(
                         experimental_prefetch_to_device = False,
-                        experimental_replication_mode = tf.distribute.InputReplicationMode.PER_REPLICA
+                        experimental_replication_mode = tf.distribute.InputReplicationMode.PER_REPLICA,
                         experimental_place_dataset_on_device = True))
 
 
