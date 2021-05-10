@@ -4,11 +4,11 @@ import sys
 
 
 METHOD_ID = 1
-if(len(sys.argv)==2 and int(sys.argv[1]<8)):
+if(len(sys.argv)==2 and int(sys.argv[1])<8):
     METHOD_ID = int(sys.argv[1])
-    print("METHOD_ID=", METHOD_ID)
+    print("[EXAMPLE]\tMETHOD_ID=", METHOD_ID)
 else:
-    print("Take METHOD_ID=1 as default")
+    print("[EXAMPLE]\tTake METHOD_ID=1 as default")
 
 
 mirrored_strategy = tf.distribute.MirroredStrategy()
