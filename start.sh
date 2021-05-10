@@ -1,6 +1,12 @@
 #!/bin/bash
+if [ -z "$1" ]
+then
+    device="all"
+else
+    device=$1
+fi
+
 cd docker
 docker build -t tf-dataloader:v1 .
 cd ..
-usr_id=`id | grep -oE "uid=[0-9]+" | grep -oE "[0-9]+"`
-nvidia-docker run -it --name georgel-tf --rm -v $PWD:/home --user ${usr_id} tf-dataloader:v1 /bin/bash
+nvidia-docker run --gpus "device=${device}" -it --name georgel-tf --rm -v $PWD:/home -u $(id -u):$(id -g) tf-dataloader:v1 /bin/bash
