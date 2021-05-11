@@ -7,6 +7,7 @@ else
 fi
 
 cd docker
-docker build -t tf-dataloader:v1 .
+nvidia-docker build -t tf-dataloader:v1 .
 cd ..
-nvidia-docker run --gpus "device=${device}" -it --name georgel-tf --rm -v $PWD:/home -u $(id -u):$(id -g) tf-dataloader:v1 /bin/bash
+NV_GPU=${device} \
+nvidia-docker run -it --name georgel-tf --rm -v $PWD:/home -u $(id -u):$(id -g) tf-dataloader:v1 /bin/bash

@@ -7,4 +7,5 @@ else
     device=$1
 fi
 
-nvidia-docker run --gpus "device=${device}" -it --name georgel-tf --rm -u $(id -u):$(id -g) -v $PWD:/home tf-dataloader:v1 /bin/bash
+NV_GPU=${device} \
+nvidia-docker run -it --name georgel-tf --rm -u $(id -u):$(id -g) -v $PWD:/home tf-dataloader:v1 /bin/bash
