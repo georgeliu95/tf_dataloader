@@ -24,7 +24,7 @@ if gpus:
 
 
 mirrored_strategy = tf.distribute.MirroredStrategy()
-print('Number of devices: {}'.format(mirrored_strategy.num_replicas_in_sync))
+print('Device: {} Number of devices: {}'.format(hvd.rank(), mirrored_strategy.num_replicas_in_sync))
 
 rng_0 = nvtx.start_range(message="model")
 with mirrored_strategy.scope():
@@ -107,9 +107,9 @@ elif(METHOD_ID in [8,9]):
     dist_label_values = mirrored_strategy.experimental_distribute_values_from_function(label_value_fn)
 
 
-dataset = dataset.shard(hvd.size(), hvd.rank())
-if dist_dataset is not None:
-    dist_dataset = dist_dataset.shard(hvd.size(), hvd.rank())
+# dataset = dataset.shard(hvd.size(), hvd.rank())
+# if dist_dataset is not None:
+#     dist_dataset = dist_dataset.shard(hvd.size(), hvd.rank())
 
 
 loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True,  reduction=tf.keras.losses.Reduction.NONE)
@@ -144,7 +144,7 @@ def distributed_train_step(inputs, first_batch):
 
 rng_3 = nvtx.start_range(message="training_phase", color="blue")
 if(METHOD_ID < 8):
-    for batch, inputs in enumerate(dataset // hvd.size()):
+    for batch, inputs in enumerate(dataset.take(STEPS // hvd.size())):
         print(distributed_train_step(inputs, batch==0))
 else:
     for i in range(STEPS // hvd.size()):

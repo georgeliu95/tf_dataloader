@@ -24,7 +24,7 @@ else:
 
 
 mirrored_strategy = tf.distribute.MirroredStrategy()
-print('Number of devices: {}'.format(mirrored_strategy.num_replicas_in_sync))
+print('Device: {} Number of devices: {}'.format(hvd.rank(), mirrored_strategy.num_replicas_in_sync))
 
 
 rng_0 = nvtx.start_range(message="model")
@@ -48,16 +48,17 @@ with mirrored_strategy.scope():
                   experimental_run_tf_function=False)
 nvtx.end_range(rng_0)
 
-# class PrintLR(tf.keras.callbacks.Callback):
-    # def on_epoch_end(self, epoch, logs=None):
-    #     print('\nLearning rate for epoch {} is {}'.format(epoch + 1, model.optimizer.lr.numpy()))
+class PrintLR(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        if hvd.rank()==0:
+            print('\nLearning rate for epoch {} is {}'.format(epoch + 1, model.optimizer.lr.numpy()))
 
 callbacks = [
     # Horovod: broadcast initial variable states from rank 0 to all other processes.
     # This is necessary to ensure consistent initialization of all workers when
     # training is started with random weights or restored from a checkpoint.
     hvd.callbacks.BroadcastGlobalVariablesCallback(0),
-    # PrintLR
+    PrintLR(),
 ]
 
 STEPS = 50
