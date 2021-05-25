@@ -95,29 +95,32 @@ nvtx.end_range(rng_2)
 
 
 def compute_loss(labels, predictions):
-  per_example_loss = loss_object(labels, predictions)
-  return tf.nn.compute_average_loss(per_example_loss, global_batch_size=GLOBAL_BATCH_SIZE)
+    per_example_loss = loss_object(labels, predictions)
+    return tf.nn.compute_average_loss(per_example_loss, global_batch_size=GLOBAL_BATCH_SIZE)
 
 def train_step(inputs):
-  features, labels = inputs
+    features, labels = inputs
 
-  with tf.GradientTape() as tape:
-    predictions = model(features, training=True)
-    loss = compute_loss(labels, predictions)
+    with tf.GradientTape() as tape:
+        predictions = model(features, training=True)
+        loss = compute_loss(labels, predictions)
 
-  gradients = tape.gradient(loss, model.trainable_variables)
-  optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-  return loss
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    return loss 
 
 @tf.function
 def distributed_train_step(inputs):
-  per_replica_losses = mirrored_strategy.run(train_step, args=(inputs,))
-  return mirrored_strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_losses, axis=None)
+    per_replica_losses = mirrored_strategy.run(train_step, args=(inputs,))
+    return mirrored_strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_losses, axis=None)
 
 
 rng_3 = nvtx.start_range(message="training_phase", color="blue")
-if(METHOD_ID < 8):
+if(METHOD_ID < 4):
     for batch in dataset:
+        print(distributed_train_step(batch))
+elif(METHOD_ID < 8):
+    for batch in dist_dataset:
         print(distributed_train_step(batch))
 else:
     for i in range(STEPS):

@@ -144,8 +144,11 @@ def distributed_train_step(inputs, first_batch):
 
 
 rng_3 = nvtx.start_range(message="training_phase", color="blue")
-if(METHOD_ID < 8):
+if(METHOD_ID < 4):
     for batch, inputs in enumerate(dataset.take(STEPS // hvd.size())):
+        print(distributed_train_step(inputs, batch==0))
+elif(METHOD_ID < 8):
+    for batch, inputs in enumerate(dist_dataset.take(STEPS // hvd.size())):
         print(distributed_train_step(inputs, batch==0))
 else:
     for i in range(STEPS // hvd.size()):
