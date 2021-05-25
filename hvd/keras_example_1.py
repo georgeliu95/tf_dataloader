@@ -73,12 +73,12 @@ nvtx.end_range(rng_1)
 rng_2 = nvtx.start_range(message="dataset")
 dataset, dist_dataset = None, None
 if(METHOD_ID in [1,2]):
-    dataset = tf.data.Dataset.from_tensor_slices((features, labels)).repeat(STEPS).batch(GLOBAL_BATCH_SIZE)
+    dataset = tf.data.Dataset.from_tensor_slices((features, labels)).shard(num_shards=hvd.size(), index=hvd.rank()).repeat(STEPS).batch(GLOBAL_BATCH_SIZE)
     if(METHOD_ID==2):
         dist_dataset = mirrored_strategy.experimental_distribute_dataset(dataset)
 
 elif(METHOD_ID==3):
-    dataset = tf.data.Dataset.from_tensor_slices((features, labels)).repeat(STEPS).batch(GLOBAL_BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+    dataset = tf.data.Dataset.from_tensor_slices((features, labels)).shard(num_shards=hvd.size(), index=hvd.rank()).repeat(STEPS).batch(GLOBAL_BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
     dist_dataset = mirrored_strategy.experimental_distribute_dataset(dataset)
 
 elif(METHOD_ID in [4,5,6,7]):
@@ -87,9 +87,9 @@ elif(METHOD_ID in [4,5,6,7]):
         features = tf.random.normal([batch_size, 8 * 1024], dtype=tf.float32)
         labels = tf.random.uniform([batch_size, 1], 0, 2, dtype=tf.int64)
         if(METHOD_ID in [4,6]):
-            dataset = tf.data.Dataset.from_tensor_slices((features, labels)).repeat(STEPS).batch(batch_size)
+            dataset = tf.data.Dataset.from_tensor_slices((features, labels)).shard(num_shards=hvd.size(), index=hvd.rank()).repeat(STEPS).batch(batch_size)
         else:
-            dataset = tf.data.Dataset.from_tensor_slices((features, labels)).repeat(STEPS).batch(batch_size).prefetch(5)
+            dataset = tf.data.Dataset.from_tensor_slices((features, labels)).shard(num_shards=hvd.size(), index=hvd.rank()).repeat(STEPS).batch(batch_size).prefetch(5)
         return dataset
     
     if(METHOD_ID in [4,5]):
